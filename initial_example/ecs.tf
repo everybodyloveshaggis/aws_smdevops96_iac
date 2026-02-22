@@ -15,72 +15,49 @@ resource "aws_ecs_cluster" "cv-site-nextjs_cluster" {
   }
 }
 
-# ------------------------------------------------------------------
-# Task definition for the Next.js container
-# ------------------------------------------------------------------
 resource "aws_ecs_task_definition" "nextjs" {
   family                   = "nextjs"
-  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
-  cpu    = "512"
-  memory = "1024"
-
-  # execution role must allow pulling from ECR and writing logs
-  execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
-
-  container_definitions = jsonencode([
-    {
-      name  = "nextjs"
-      image = "${aws_ecr_repository.cv_site.repository_url}:latest" # or a specific tag
-
-      portMappings = [
-        {
-          containerPort = 3000
-          protocol      = "tcp"
-        }
-      ]
-
-      essential = true
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = "/ecs/nextjs"
-          awslogs-region        = "eu-west-2"
-          awslogs-stream-prefix = "ecs"
-        }
+  container_definitions = <<DEFINITION
+[
+  {
+    "name": "nextjs",
+    "image": "${aws_ecr_repository.cv_site.repository_url}:latest",
+    "portMappings": [{ "containerPort": 3000, "hostPort": 3000 }],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/nextjs",
+        "awslogs-region": "${data.aws_region.current.name}",
+        "awslogs-stream-prefix": "ecs"
       }
     }
-  ])
+  }
+]
+DEFINITION
 }
 
-# ------------------------------------------------------------------
-# Service that runs the task on the cluster
-# ------------------------------------------------------------------
 resource "aws_ecs_service" "nextjs" {
-  name            = "nextjs-service"
-  cluster         = aws_ecs_cluster.cv-site-nextjs_cluster.id
+  name            = "nextjs"
+  cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.nextjs.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
 
-  # networking (required for Fargate/awsvpc)
-network_configuration {
-  subnets          = [aws_subnet.public1.id, aws_subnet.public2.id]
-  security_groups  = [aws_security_group.ecs_sg.id]
-  assign_public_ip = true
-}
+  network_configuration {
+    subnets          = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = false
+  }
 
-  # register with ALB target group
   load_balancer {
-    target_group_arn = aws_lb_target_group.nextjs.arn
+    target_group_arn = aws_lb_target_group.nextjs_tg.arn
     container_name   = "nextjs"
     container_port   = 3000
   }
-
-  # Only depend on LB resources you explicitly reference here
-  depends_on = [
-    aws_lb_listener.http_listener
-  ]
 }
