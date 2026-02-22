@@ -66,11 +66,11 @@ resource "aws_ecs_service" "nextjs" {
   launch_type     = "FARGATE"
 
   # networking (required for Fargate/awsvpc)
-  network_configuration {
-    subnets         = aws_subnet.app_subnet.*.id # or public subnets
-    security_groups = [aws_security_group.ecs_sg.id]
-    assign_public_ip = false
-  }
+network_configuration {
+  subnets          = [aws_subnet.public1.id, aws_subnet.public2.id]
+  security_groups  = [aws_security_group.ecs_sg.id]
+  assign_public_ip = true
+}
 
   # register with ALB target group
   load_balancer {
