@@ -68,14 +68,14 @@ resource "aws_ecs_service" "nextjs" {
 
   # networking (required for Fargate/awsvpc)
   network_configuration {
-    subnets          = aws_subnet.app_subnet.*.id     # or public_subnets
     security_groups  = [aws_security_group.ecs_sg.id]
-    assign_public_ip = false
+    assign_public_ip = true
+    subnets         = [aws_subnet.public1.id, aws_subnet.public2.id]
   }
 
   # optional – register with an ALB target group
   load_balancer {
-    target_group_arn = aws_lb_target_group.nextjs.arn
+    target_group_arn = aws_lb_target_group.app_tg.arn
     container_name   = "nextjs"
     container_port   = 3000
   }
