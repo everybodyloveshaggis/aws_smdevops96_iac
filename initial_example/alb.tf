@@ -1,4 +1,5 @@
 # alb.tf
+
 resource "aws_lb" "app_alb" {
   name               = "app-load-balancer"
   internal           = false

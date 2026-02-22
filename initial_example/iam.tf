@@ -1,4 +1,5 @@
 # iam.tf
+
 data "aws_iam_policy_document" "ecs_task_assume_role" {
   statement {
     effect  = "Allow"
@@ -18,5 +19,5 @@ resource "aws_iam_role" "ecsTaskExecutionRole" {
 
 resource "aws_iam_role_policy_attachment" "ecs_task_exec_managed" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy_arn  = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
