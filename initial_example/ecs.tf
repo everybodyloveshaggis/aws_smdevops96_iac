@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------
+# task definition for cluster
+# ------------------------------------------------------------------
+
 resource "aws_ecs_cluster" "cv-site-nextjs_cluster" {
   name = "cv-site-nextjs-cluster"
 
@@ -31,7 +35,7 @@ resource "aws_ecs_task_definition" "nextjs" {
   container_definitions = jsonencode([
     {
       name  = "nextjs"
-      image = "${aws_ecr_repository.nextjs.repository_url}:latest"  # or a specific tag
+      image = "${aws_ecr_repository.cv-site-nextjs.repository_url}:latest"  # or a specific tag
 
       portMappings = [{
         containerPort = 3000
