@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "eu-west-2"
-}
-
 resource "aws_ecs_cluster" "cv-site-nextjs_cluster" {
   name = "cv-site-nextjs-cluster"
 
