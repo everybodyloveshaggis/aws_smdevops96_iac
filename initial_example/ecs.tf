@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "nextjs" {
   container_definitions = jsonencode([
     {
       name  = "nextjs"
-      image = "${aws_ecr_repository.cv-site-nextjs.repository_url}:latest"  # or a specific tag
+      image = "${aws_ecr_repository.cv_site.repository_url}:latest"  # or a specific tag
 
       portMappings = [{
         containerPort = 3000
