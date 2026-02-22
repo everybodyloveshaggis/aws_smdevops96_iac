@@ -56,13 +56,23 @@ resource "aws_route_table_association" "public_assoc" {
 resource "aws_security_group" "ssh_sg" {
   name   = "ssh-access"
   vpc_id = aws_vpc.app_vpc.id
+
   ingress {
-    description = "SSH"
+    description = "SSH from my IP"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [var.ssh_cidr]
   }
+
+  ingress {
+    description = "EC2 Instance Connect"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["3.8.37.24/29"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
