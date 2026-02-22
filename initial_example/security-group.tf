@@ -1,12 +1,8 @@
-variable "ssh_cidr" {
-  description = "CIDR block that is allowed to SSH to the instances"
-  type        = string
-  # you can supply a default or leave it blank and pass it via -var/TF_VAR
-  default     = "0.0.0.0/0"
-}
-
+# security-groups.tf
 resource "aws_security_group" "alb_sg" {
-  vpc_id = aws_vpc.main.id
+  name        = "alb-sg"
+  description = "ALB ingress"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
@@ -24,22 +20,15 @@ resource "aws_security_group" "alb_sg" {
 }
 
 resource "aws_security_group" "ecs_sg" {
-  name        = "ecs-security-group"
-  description = "Allow inbound HTTP and SSH"
-  vpc_id     = aws_vpc.main.id
+  name        = "ecs-sg"
+  description = "ECS tasks ingress from ALB"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.ssh_cidr]
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
