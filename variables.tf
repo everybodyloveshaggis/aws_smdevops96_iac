@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Project name prefix for resources"
   type        = string
-  default     = "smdevops96-nextjs"
+  default     = "smdevops96-nextjs-cvsite"
 }
 
 variable "environment" {
